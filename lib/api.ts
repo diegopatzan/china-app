@@ -1,7 +1,18 @@
-// Helper to fetch from API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api`;
+  }
+  if (typeof window !== 'undefined') {
+    return '/api'; // Browser client-side relative URL
+  }
+  return 'http://localhost:3000/api'; // Default for local server-side
+};
 
 export async function fetchFromApi(endpoint: string, page: number = 1, pageSize: number = 20, filters?: Record<string, string>) {
+  const baseUrl = getBaseUrl();
   try {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -9,7 +20,9 @@ export async function fetchFromApi(endpoint: string, page: number = 1, pageSize:
       ...filters, 
     });
 
-    const res = await fetch(`${API_BASE_URL}/${endpoint}?${params.toString()}`, {
+    const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}/${endpoint}?${params.toString()}`;
+    
+    const res = await fetch(url, {
       cache: 'no-store',
     });
     
@@ -25,9 +38,17 @@ export async function fetchFromApi(endpoint: string, page: number = 1, pageSize:
   }
 }
 
-export async function fetchSingleFromApi(endpoint: string) {
+export async function fetchSingleFromApi(endpoint: string, filters?: Record<string, string>) {
+  const baseUrl = getBaseUrl();
   try {
-    const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    const params = new URLSearchParams(filters);
+    const queryString = filters ? `?${params.toString()}` : '';
+
+    const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}/${endpoint}${queryString}`;
+    
+    console.log('Fetching:', url);
+
+    const res = await fetch(url, {
       cache: 'no-store',
     });
     
