@@ -60,6 +60,19 @@ export default async function MembresiasPage({
   const { data, total } = await getMembresias(resolvedSearchParams);
   const totalPages = Math.ceil(total / pageSize);
 
+  const baseQuery = new URLSearchParams(
+    Object.entries(resolvedSearchParams)
+      .filter(([key]) => key !== 'page')
+      .map(([key, value]) => [key, Array.isArray(value) ? value[0] ?? '' : value])
+  );
+
+  const createPageHref = (pageNumber: number) => {
+    const params = new URLSearchParams(baseQuery.toString());
+    params.set('page', pageNumber.toString());
+    const qs = params.toString();
+    return `/dashboard/membresias${qs ? `?${qs}` : ''}`;
+  };
+
   const columns: {
     header: string;
     accessorKey: keyof MembresiaRow;
@@ -113,6 +126,8 @@ export default async function MembresiasPage({
         currentPage={page}
         totalPages={totalPages}
         baseUrl="/dashboard/membresias"
+        prevHref={page > 1 ? createPageHref(page - 1) : undefined}
+        nextHref={page < totalPages ? createPageHref(page + 1) : undefined}
       />
     </div>
   );

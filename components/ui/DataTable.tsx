@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 interface Column<T> {
   header: string;
   accessorKey: keyof T | ((item: T) => React.ReactNode);
@@ -17,23 +16,25 @@ interface DataTableProps<T> {
   baseUrl?: string;
   currentPageSize?: number;
   totalItems?: number;
+  prevHref?: string;
+  nextHref?: string;
 }
 
-export function DataTable<T>({ 
-  columns, 
-  data, 
+export function DataTable<T>({
+  columns,
+  data,
   title,
   currentPage = 1,
-  currentPageSize = 20, 
+  currentPageSize = 20,
   totalItems = 0,
   totalPages = 1,
-  baseUrl = ''
+  baseUrl = '',
+  prevHref,
+  nextHref,
 }: DataTableProps<T>) {
-  
- // Pagination items
+  // Pagination items
   const startItem = (currentPage - 1) * currentPageSize + 1;
   const endItem = Math.min(currentPage * currentPageSize, totalItems);
-
 
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-sm overflow-hidden">
@@ -97,23 +98,35 @@ export function DataTable<T>({
       {/* Footer Pagination Controls */}
       {totalPages > 1 && (
         <div className="bg-white px-4 py-3 flex items-center justify-end border-t border-gray-200 gap-2">
-            <Link 
-              href={currentPage > 1 ? `${baseUrl}?page=${currentPage - 1}` : '#'}
-              className={`p-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-[#714B67] hover:text-white hover:border-[#714B67] transition-all ${currentPage <= 1 ? 'opacity-30 pointer-events-none' : ''}`}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Link>
-            <div className="text-sm font-medium text-gray-700 px-2 cursor-default">
-              <span className="text-gray-900">{currentPage}</span>
-              <span className="mx-1 text-gray-400">/</span>
-              <span className="text-gray-600">{totalPages}</span>
-            </div>
-            <Link 
-              href={currentPage < totalPages ? `${baseUrl}?page=${currentPage + 1}` : '#'}
-              className={`p-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-[#714B67] hover:text-white hover:border-[#714B67] transition-all ${currentPage >= totalPages ? 'opacity-30 pointer-events-none' : ''}`}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Link>
+          <Link
+            href={
+              currentPage > 1
+                ? prevHref ?? `${baseUrl}?page=${currentPage - 1}`
+                : '#'
+            }
+            className={`p-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-[#714B67] hover:text-white hover:border-[#714B67] transition-all ${
+              currentPage <= 1 ? 'opacity-30 pointer-events-none' : ''
+            }`}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Link>
+          <div className="text-sm font-medium text-gray-700 px-2 cursor-default">
+            <span className="text-gray-900">{currentPage}</span>
+            <span className="mx-1 text-gray-400">/</span>
+            <span className="text-gray-600">{totalPages}</span>
+          </div>
+          <Link
+            href={
+              currentPage < totalPages
+                ? nextHref ?? `${baseUrl}?page=${currentPage + 1}`
+                : '#'
+            }
+            className={`p-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-[#714B67] hover:text-white hover:border-[#714B67] transition-all ${
+              currentPage >= totalPages ? 'opacity-30 pointer-events-none' : ''
+            }`}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Link>
         </div>
       )}
     </div>
